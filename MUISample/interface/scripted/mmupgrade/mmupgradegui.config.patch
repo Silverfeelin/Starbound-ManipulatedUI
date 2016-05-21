@@ -1,0 +1,120 @@
+[
+  {
+    "op": "add",
+    "path": "/gui/muiImgSample",
+    "value": {
+      "type" : "image",
+      "zlevel" : 12,
+      "file" : "/interface/scripted/mmupgrade/modules.png",
+      "position" : [0, 0]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/muiBtnSample",
+    "value": {
+      "type" : "button",
+      "base" : "/assetMissing.png?scalenearest=2.1?crop;0;0;130;36",
+      "hover" : "/assetMissing.png?replace;ffffff00=ffffff20?scalenearest=2.1?crop;0;0;130;36",
+      "pressedOffset" : [0, 0],
+      "zlevel" : 14,
+      "position" : [0, 0],
+      "callback" : "mui.showInterface"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/muiLblSample",
+    "value": {
+      "type": "label",
+      "zlevel": 13,
+      "position": [
+        72,
+        26
+      ],
+      "hAnchor": "mid",
+      "vAnchor": "top",
+      "value": "Sample"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/muiLblSample2",
+    "value": {
+      "type": "label",
+      "zlevel": 13,
+      "position": [
+        72,
+        16
+      ],
+      "hAnchor": "mid",
+      "vAnchor": "top",
+      "value": "Interface"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/SampleImgTest",
+    "value": {
+      "type" : "image",
+      "zlevel" : 13,
+      "file" : "/interface/scripted/mmupgrade/modules.png",
+      "position" : [103, 82]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/SampleBtnTest",
+    "value": {
+      "type" : "button",
+      "base" : "/assetMissing.png?scalenearest=2.1?crop;0;0;130;36",
+      "hover" : "/assetMissing.png?replace;ffffff00=ffffff20?scalenearest=2.1?crop;0;0;130;36",
+      "pressedOffset" : [0, 0],
+      "zlevel" : 15,
+      "position" : [103, 82],
+      "callback" : "muiSample.test"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/SampleLblTest",
+    "value": {
+      "type": "label",
+      "zlevel": 14,
+      "position": [
+        175,
+        103
+      ],
+      "hAnchor": "mid",
+      "vAnchor": "top",
+      "value": "You've opened the sample!"
+    }
+  },
+
+  {
+    "op": "add",
+    "path": "/mui/packages/-",
+    "value": {
+      "activator": "muiBtnSample",
+      "script": "/scripts/muiSample.lua",
+      "muiControls": {
+        "muiBtnSample": [0,0],
+        "muiImgSample": [0,0],
+        "muiLblSample": [72,26],
+        "muiLblSample2": [72,16]
+      },
+      "show": [
+        "SampleImgTest",
+        "SampleLblTest",
+        "SampleBtnTest"
+      ],
+      "hide": []
+    }
+  },
+
+  {
+    "op": "add",
+    "path": "/scriptWidgetCallbacks/-",
+    "value": "muiSample.test"
+  }
+]
