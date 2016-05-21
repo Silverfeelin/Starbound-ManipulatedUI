@@ -1,0 +1,64 @@
+[
+  {
+    "op": "add",
+    "path": "/gui/imgOpenMyInterface",
+    "value": {
+      "type": "image",
+      "zlevel": 11,
+      "file": "/interface/scripted/mmupgrade/modules.png",
+      "position": [
+        0,
+        0
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/btnOpenMyInterface",
+    "value": {
+      "type": "button",
+      "base": "/assetMissing.png?scalenearest=2.1?crop;0;0;130;36",
+      "hover": "/assetMissing.png?scalenearest=2.1?crop;0;0;130;36",
+      "pressedOffset": [
+        0,
+        0
+      ],
+      "zlevel": 12,
+      "position": [
+        0,
+        0
+      ],
+      "callback": "mui.showInterface"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/lblOpenMyInterface",
+    "value": {
+      "type": "label",
+      "zlevel": 13,
+      "position": [
+        72,
+        26
+      ],
+      "hAnchor": "mid",
+      "vAnchor": "top",
+      "value": "My Interface"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/gui/lblMyInterface",
+    "value": {
+      "type": "label",
+      "zlevel": 15,
+      "position": [
+        103,
+        102
+      ],
+      "hAnchor": "mid",
+      "vAnchor": "top",
+      "value": "My interface is being shown!"
+    }
+  }
+]

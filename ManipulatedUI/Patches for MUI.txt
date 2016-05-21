@@ -1,0 +1,19 @@
+[
+  {
+    "op": "add",
+    "path": "/mui/packages/-",
+    "value": {
+      "activator": "btnOpenMyInterface",
+      "script": "/scripts/myScript.lua",
+      "muiControls": {
+        "btnOpenMyInterface": [0,0],
+        "imgOpenMyInterface": [0,0],
+        "lblOpenMyInterface": [72,26]
+      },
+      "show": [
+        "lblMyInterface"
+      ],
+      "hide": []
+    }
+  }
+]
