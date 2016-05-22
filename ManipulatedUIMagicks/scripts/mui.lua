@@ -52,16 +52,22 @@ end
  Runs the update function of the currently opened interface, if this function exists.
 ]]
 function update(dt)
-	if mui.active ~= '' then
-		if _ENV[mui.active] then
-			if type(_ENV[mui.active].update) == "function" then
-				_ENV[mui.active].update(dt)
-			end
-		end
-	end
-
+  if mui.active ~= '' then
+    local pkg = _ENV[mui.active]
+    if type(pkg) == "table" and type(pkg.update) == "function" then pkg.update(dt) end
+  end
 end
 
+--[[
+  Uninitialize function, called by the game's engine when MUI is closed.
+  Runs the uninitialize function of the currently opened interface, if this function exists.
+]]
+function uninit()
+  if mui.active ~= '' then
+    local pkg = _ENV[mui.active]
+    if type(pkg) == "table" and type(pkg.uninit) == "function" then pkg.uninit() end
+  end
+end
 --[[
   Hides the opened interface (if any), and shows the MUI main menu.
 ]]
@@ -76,35 +82,38 @@ end
  @param [widgetData] - Widget data, which should be the table name as defined in the package.
 ]]
 function showInterface(widgetName,widgetData)
-	mui.active = widgetData or ''
-	if mui.active ~= '' then
-		for i,data in ipairs(mui.packages) do
-			if data.name ~= mui.active then
-				widget.setVisible(data.activator,false)
-				for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
-			elseif data.name == mui.active then
-				widget.setVisible(data.activator,false)
-				for i,wid in ipairs(data.show) do widget.setVisible(wid,true) end
-				for i,wid in ipairs(data.hide) do widget.setVisible(wid,false) end
-				for name,image in pairs(data.update) do
-					widget.setImage(name,image)			
-				end
-			end	
-		end
-		if _ENV[mui.active] then
-			if type(_ENV[mui.active].init) == "function" then
-				_ENV[mui.active].init()
-			end
-		end
-	elseif mui.active == '' then
-		for i,data in ipairs(mui.packages) do
-			for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
-		end
-		for wid,image in pairs(mui.defaults) do 
-			widget.setVisible(wid,true)
-			widget.setImage(wid,image) 
-		end
-		for i,data in ipairs(mui.packages) do widget.setVisible(data.activator,true) end
-	end
+  -- Uninitialize previous package.
+  if mui.active ~= '' and _ENV[mui.active] and _ENV[mui.active].uninit then _ENV[mui.active].uninit() end
+  
+  mui.active = widgetData or ''
+  if mui.active ~= '' then
+    for i,data in ipairs(mui.packages) do
+      if data.name ~= mui.active then
+        widget.setVisible(data.activator,false)
+        for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
+      elseif data.name == mui.active then
+        widget.setVisible(data.activator,false)
+        for i,wid in ipairs(data.show) do widget.setVisible(wid,true) end
+        for i,wid in ipairs(data.hide) do widget.setVisible(wid,false) end
+        for name,image in pairs(data.update) do
+          widget.setImage(name,image)			
+        end
+      end	
+    end
+    
+    local pkg = _ENV[mui.active]
+    if type(pkg) == "table" and type(pkg.init) == "function" then
+      pkg.init()
+    end
+  elseif mui.active == '' then
+    for i,data in ipairs(mui.packages) do
+      for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
+    end
+    for wid,image in pairs(mui.defaults) do 
+      widget.setVisible(wid,true)
+      widget.setImage(wid,image) 
+    end
+    for i,data in ipairs(mui.packages) do widget.setVisible(data.activator,true) end
+  end
 end
 
