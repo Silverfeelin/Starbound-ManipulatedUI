@@ -1,57 +1,23 @@
 [
   {
-    "op": "add",
-    "path": "/gui/muiImgSample",
-    "value": {
-      "type" : "image",
-      "zlevel" : 12,
-      "file" : "/interface/scripted/mmupgrade/modules.png",
-      "position" : [0, 0]
-    }
-  },
-  {
-    "op": "add",
-    "path": "/gui/muiBtnSample",
-    "value": {
-      "type" : "button",
-      "base" : "/assetMissing.png?scalenearest=2.1?crop;0;0;130;36",
-      "hover" : "/assetMissing.png?replace;ffffff00=ffffff20?scalenearest=2.1?crop;0;0;130;36",
-      "pressedOffset" : [0, 0],
-      "zlevel" : 14,
-      "position" : [0, 0],
-      "callback" : "mui.showInterface"
-    }
-  },
-  {
-    "op": "add",
-    "path": "/gui/muiLblSample",
-    "value": {
-      "type": "label",
-      "zlevel": 13,
-      "position": [
-        72,
-        26
-      ],
-      "hAnchor": "mid",
-      "vAnchor": "top",
-      "value": "Sample"
-    }
-  },
-  {
-    "op": "add",
-    "path": "/gui/muiLblSample2",
-    "value": {
-      "type": "label",
-      "zlevel": 13,
-      "position": [
-        72,
-        16
-      ],
-      "hAnchor": "mid",
-      "vAnchor": "top",
-      "value": "Interface"
-    }
-  },
+	"op" : "add",
+	"path" : "/gui/btnMUISample",
+	"value" : {
+			"type" : "button",
+			"base" : "/reasources/UIActivator.png",
+			"hover" : "/reasources/UIActivator.png?brightness=60",
+			"caption" : "Open Sample\n Interface",
+			"fontSize" : 7,
+			"wrapWidth" : 80,
+			"hAnchor" : "mid",
+			"pressedOffset" : [0, -1],
+			"position" : [102, 103],
+
+			"data" : "muiSample",
+			"callback" : "showInterface"
+		} 
+	},
+  
   {
     "op": "add",
     "path": "/gui/SampleImgTest",
@@ -93,23 +59,16 @@
 
   {
     "op": "add",
-    "path": "/mui/packages/-",
+    "path": "/packages/-",
     "value": {
-      "activator": "muiBtnSample",
-      "script": "/scripts/muiSample.lua",
-      "muiControls": {
-        "muiBtnSample": [0,0],
-        "muiImgSample": [0,0],
-        "muiLblSample": [72,26],
-        "muiLblSample2": [72,16]
-      },
-      "show": [
-        "SampleImgTest",
-        "SampleLblTest",
-        "SampleBtnTest"
-      ],
-      "hide": []
-    }
+			"activator" : "btnMUISample",
+			"show" : [ "SampleLblTest","SampleBtnTest","SampleImgTest" ],
+			"hide" : [],
+			"update" : {},
+			"name" : "muiSample",
+			"script" : "/interface/scripted/mmupgrade/mmupgradegui.lua" //script should be formatted as <name>.init() and <name>.update(dt)
+		
+		}
   },
 
   {
