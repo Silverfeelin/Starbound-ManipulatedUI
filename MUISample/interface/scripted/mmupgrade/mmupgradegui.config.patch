@@ -66,7 +66,7 @@
 			"hide" : [],
 			"update" : {},
 			"name" : "muiSample",
-			"script" : "/interface/scripted/mmupgrade/mmupgradegui.lua" //script should be formatted as <name>.init() and <name>.update(dt)
+			"script" : "/scripts/muiSample.lua" //script should be formatted as <name>.init() and <name>.update(dt)
 		
 		}
   },
