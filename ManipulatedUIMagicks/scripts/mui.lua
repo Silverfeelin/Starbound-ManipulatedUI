@@ -1,4 +1,4 @@
-
+require'/scripts/vec2.lua'
 mui = { packages = { }, active = '' }
 
 function mui.getGridOffsets(n, padding)
@@ -44,7 +44,11 @@ function init()
 end
 function update(dt)
 	if mui.active ~= '' then
-		_ENV[mui.active].update(dt)
+		if _ENV[mui.active] then
+			if type(_ENV[mui.active].update) == "function" then
+				_ENV[mui.active].update(dt)
+			end
+		end
 	end
 
 end
@@ -53,8 +57,8 @@ function showInterface(widgetName,widgetData)
 	if mui.active ~= '' then
 		for i,data in ipairs(mui.packages) do
 			if data.name ~= mui.active then
-				for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end
 				widget.setVisible(data.activator,false)
+				for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
 			elseif data.name == mui.active then
 				widget.setVisible(data.activator,false)
 				for i,wid in ipairs(data.show) do widget.setVisible(wid,true) end
@@ -64,7 +68,11 @@ function showInterface(widgetName,widgetData)
 				end
 			end	
 		end
-		_ENV[mui.active].init()
+		if _ENV[mui.active] then
+			if type(_ENV[mui.active].init) == "function" then
+				_ENV[mui.active].init()
+			end
+		end
 	elseif mui.active == '' then
 		for i,data in ipairs(mui.packages) do
 			for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
