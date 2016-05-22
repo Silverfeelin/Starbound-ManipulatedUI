@@ -52,6 +52,14 @@ function update(dt)
 	end
 
 end
+
+--[[
+  Hides the opened interface (if any), and shows the MUI main menu.
+]]
+function mui.back()
+  showInterface()
+end
+
 function showInterface(widgetName,widgetData)
 	mui.active = widgetData or ''
 	if mui.active ~= '' then
