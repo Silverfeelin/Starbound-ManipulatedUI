@@ -1,9 +1,6 @@
 require "/scripts/util.lua"
-
-
-function init()
-  require "/scripts/manipulatedUI.lua"
-
+mmupgrade = {}
+function mmupgrade.init()
   self.currentUpgrades = {}
   self.upgradeConfig = config.getParameter("upgrades")
   self.buttonStateImages = config.getParameter("buttonStateImages")
@@ -19,7 +16,7 @@ function init()
   updateGui()
 end
 
-function update(dt)
+function mmupgrade.update(dt)
   self.autoRefreshTimer = math.max(0, self.autoRefreshTimer - dt)
   if self.autoRefreshTimer == 0 then
     updateGui()
