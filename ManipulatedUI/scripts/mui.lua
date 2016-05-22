@@ -68,11 +68,32 @@ function uninit()
     if type(pkg) == "table" and type(pkg.uninit) == "function" then pkg.uninit() end
   end
 end
+
 --[[
   Hides the opened interface (if any), and shows the MUI main menu.
 ]]
 function mui.back()
   showInterface()
+end
+
+--[[
+  Sets the interface icon to the given path.
+  This change is undone when going back to the main menu.
+  @param path - String value representing the asset path to the image.
+]]
+function mui.setIcon(path)
+  widget.setImage("imgTitleIcon", path)
+end
+
+--[[
+  Sets the interface title text.
+  This change is undone when going back to the main menu.
+  @parm [title] - Window title, only set when a non-nil value is given.
+  @param [subtitle] - Window subtitle, only set when a non-nil value is given.
+]]
+function mui.setTitle(title, subtitle)
+  if title then widget.setText("lblTitle", title) end
+  if subtitle then widget.setText("lblSubtitle", "^gray;" .. subtitle) end
 end
 
 --[[
@@ -106,6 +127,9 @@ function showInterface(widgetName,widgetData)
       pkg.init()
     end
   elseif mui.active == '' then
+    mui.setTitle("Manipulated UI", "Manipulates more than the matter manipulator.")
+    mui.setIcon("/interface/manipulatorupgradeicon.png")
+
     for i,data in ipairs(mui.packages) do
       for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
     end
