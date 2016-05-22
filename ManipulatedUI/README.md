@@ -29,8 +29,8 @@ It is recommended to first use and adjust the existing template for package list
 "path" : "/gui/btnMUISample",
 "value" : {
 		"type" : "button",
-		"base" : "/reasources/UIActivator.png",
-		"hover" : "/reasources/UIActivator.png?brightness=60",
+		"base" : "/resources/UIActivator.png",
+		"hover" : "/resources/UIActivator.png?brightness=60",
 		"caption" : "Open Sample\n Interface",
 		"fontSize" : 7,
 		"wrapWidth" : 80,
