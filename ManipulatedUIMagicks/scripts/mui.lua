@@ -31,6 +31,10 @@ function mui.getGridOffsets(n, padding)
   end
 end
 
+--[[
+ Initialize function, called by the game's engine when MUI is opened (after this script is loaded).
+ Obtains configuration details and positions main menu package controls.
+]]
 function init()
 	mui.packages = config.getParameter'packages'
 	mui.defaults = config.getParameter'defaults' 
@@ -42,6 +46,11 @@ function init()
 	showInterface()
 
 end
+
+--[[
+ Update function, called by the game's engine every tick while MUI is open.
+ Runs the update function of the currently opened interface, if this function exists.
+]]
 function update(dt)
 	if mui.active ~= '' then
 		if _ENV[mui.active] then
@@ -60,6 +69,12 @@ function mui.back()
   showInterface()
 end
 
+--[[
+ Button callback function that shows the interface bound to the pressed button.
+ Can be used to return to the main menu by not passing any arguments.
+ @param [widgetName] - Widget name of the button.
+ @param [widgetData] - Widget data, which should be the table name as defined in the package.
+]]
 function showInterface(widgetName,widgetData)
 	mui.active = widgetData or ''
 	if mui.active ~= '' then
