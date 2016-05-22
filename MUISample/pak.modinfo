@@ -2,6 +2,6 @@
   "name" : "MUISample",
   "path" : ".",
   "requires" : [
-    "ManipulatedUI"
+    "Manipulated UI"
   ]
 }
