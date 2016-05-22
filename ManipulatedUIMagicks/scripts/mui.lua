@@ -3,32 +3,25 @@ mui = { packages = { }, active = '' }
 
 function mui.getGridOffsets(n, padding)
   local offset = {102,103}
-  if n == 1 then
-    return {offset}
-  else
-    local grid = {}
-    local top = 183
-    local re = math.floor(n/2)
-    local r = n % 2
-    local m = (197 - (re+r) * 36) / (re+r+1)
-
-    -- Even
-    for i = 1,re do
-      local y = top - m * i - 36 * (i - 1)
-      table.insert(grid,vec2.add(offset,{-65 - padding, 0}))
-      grid[#grid][2] = y
-      table.insert(grid,vec2.add(offset,{65 + padding, 0}))
-      grid[#grid][2] = y
-    end
-
-    -- Uneven
-    if r == 1 then
-      table.insert(grid, offset)
-      grid[#grid][2] = top - m * (re+1) - 36 * re
-    end
-
-    return grid
+  local grid, top, re, r = {}, 183, math.floor(n/2), n % 2
+  local m = (197 - (re+r) * 36) / (re+r+1)
+  
+  -- Even
+  for i = 1,re do
+    local y = top - m * i - 36 * (i - 1)
+    table.insert(grid,vec2.add(offset,{-65 - padding, 0}))
+    grid[#grid][2] = y
+    table.insert(grid,vec2.add(offset,{65 + padding, 0}))
+    grid[#grid][2] = y
   end
+  
+  -- Uneven (last row)
+  if r == 1 then
+    table.insert(grid, offset)
+    grid[#grid][2] = top - m * (re+1) - 36 * re
+  end
+
+  return grid
 end
 
 function init()
@@ -43,7 +36,7 @@ function init()
 
 end
 function update(dt)
-	if mui.active ~= '' then
+	if mui.active ~= '' and _ENV[mui.active].update then
 		_ENV[mui.active].update(dt)
 	end
 
@@ -64,7 +57,7 @@ function showInterface(widgetName,widgetData)
 				end
 			end	
 		end
-		_ENV[mui.active].init()
+    if _ENV[mui.active].init then _ENV[mui.active].init() end
 	elseif mui.active == '' then
 		for i,data in ipairs(mui.packages) do
 			for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
