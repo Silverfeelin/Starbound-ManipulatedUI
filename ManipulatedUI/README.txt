@@ -2,9 +2,6 @@
 =====
 Manipulated UI (MUI)
  By Silverfeelin and Magicks
-
-This work is licensed under a Creative Commons Attribution 3.0 Unported License.
-https://creativecommons.org/licenses/by/3.0/
 =====
 
 There's three main steps required to add your own interface. Here both will be explained in detail.
