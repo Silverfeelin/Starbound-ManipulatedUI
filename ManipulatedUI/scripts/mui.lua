@@ -38,6 +38,7 @@ end
 ]]
 function mui.allocate(packageList)
 	packageList = copy(packageList)
+
 	list = {}
 	if #packageList <= 10 then return packageList end
 	for i,data in ipairs(packageList) do
@@ -51,6 +52,7 @@ function mui.allocate(packageList)
 		for i,data in ipairs(packageList) do
 			if #list < 10 then
 				data.loaded = true
+
 				table.insert(list,data)
 			end
 		end
@@ -65,8 +67,17 @@ end
 ]]
 function init()
 	mui.packages = config.getParameter('packages')
-	mui.settings = config.getParameter('settings.configuration') 
 	mui.defaults = config.getParameter('settings.defaults') 
+  
+  -- Fix packages by allocating missing properties.
+  for i,data in ipairs(mui.packages) do
+    if not data.show then data.show = {} end
+    if not data.hide then data.hide = {} end
+    if not data.update then data.update = {} end
+    if not data.settingControls then data.settingControls = {} end
+  end
+
+  mui.showingSettings = false
 
 	mui.loaded = mui.allocate(mui.packages)
 
@@ -75,8 +86,8 @@ function init()
 		widget.setPosition(data.activator,grid[i])
 		if data.script then require(data.script) end
 	end
-	require(mui.settings.script)
-	showInterface()
+
+  showInterface()
 
 end
 
@@ -130,6 +141,27 @@ function mui.setTitle(title, subtitle)
 end
 
 --[[
+  Returns a value indicating whether an interface is currently opened or not.
+]]
+function mui.isInterfaceOpen()
+  return type(mui.active) == "string" and mui.active ~= '' and true or false
+end
+
+--[[
+  Uninitializes the currently opened interface.
+  Does not show or hide widgets.
+]]
+function mui.uninitInterface()
+  mui.showingSettings = false
+  if mui.isInterfaceOpen() then
+    local pkg = _ENV[mui.active]
+    if pkg and pkg.uninit then
+      _ENV[mui.active].uninit()
+    end
+  end
+end
+
+--[[
  Button callback function that shows the interface bound to the pressed button.
  Can be used to return to the main menu by not passing any arguments.
  @param [widgetName] - Widget name of the button.
@@ -137,58 +169,80 @@ end
 ]]
 function showInterface(widgetName,widgetData)
   -- Uninitialize previous package.
-  if mui.active ~= '' and _ENV[mui.active] and _ENV[mui.active].uninit then _ENV[mui.active].uninit() end
+  mui.uninitInterface()
   
-  mui.active = widgetData or ''
-  if mui.active ~= '' and mui.active ~= 'settings' then
-    for i,data in ipairs(mui.loaded) do
-    	 widget.setVisible(data.activator,false)
-      if data.name ~= mui.active then
-        for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
-      elseif data.name == mui.active then
-        for i,wid in ipairs(data.show) do widget.setVisible(wid,true) end
-        for i,wid in ipairs(data.hide) do widget.setVisible(wid,false) end
-        for name,image in pairs(data.update) do
-          widget.setImage(name,image)			
-        end
-      end	
-    end
-    
+  mui.active = widgetData
+
+  -- Show or hide activator (main menu) widgets.
+  local show = mui.isInterfaceOpen()
+
+  mui.showActivators(not show)
+  mui.showInterfaceControls(mui.active)
+
+  if show then
     local pkg = _ENV[mui.active]
     if type(pkg) == "table" and type(pkg.init) == "function" then
       pkg.init()
     end
-  elseif mui.active == 'settings' then
-  	for i,data in ipairs(mui.loaded) do
-    	 widget.setVisible(data.activator,false)
-       for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
-    end
-    for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid,true) end
-    for i,wid in ipairs(mui.settings.hide) do widget.setVisible(wid,false) end
-    for name,image in pairs(mui.settings.update) do
-      widget.setImage(name,image)	
-    end		
-    local pkg = _ENV[mui.active]
-    if type(pkg) == "table" and type(pkg.init) == "function" then
-      pkg.init()
-    end
-  elseif mui.active == '' then
+  else
+    -- Restore main menu / defaults
     mui.setTitle("Manipulated UI", "Manipulates more than the matter manipulator.")
     mui.setIcon("/interface/manipulatorupgradeicon.png")
 
-    for i,data in ipairs(mui.packages) do
-      for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
-    end
-    for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid,false) end	
     for wid,image in pairs(mui.defaults) do 
       widget.setVisible(wid,true)
       widget.setImage(wid,image) 
     end
+    
     for i,data in ipairs(mui.loaded) do widget.setVisible(data.activator,true) end
   end
 end
-function showSettings(widgetName,widgetData)
-	showInterface(nil, "settings")
+
+function mui.showActivators(bool)
+  for i,data in ipairs(mui.loaded) do
+     widget.setVisible(data.activator, bool)
+  end
 end
 
+function mui.showInterfaceControls(pkg)
+  for i,data in ipairs(mui.loaded) do
+    local show = data.name == pkg
 
+    for j,wid in ipairs(data.show) do widget.setVisible(wid, show) end
+    for j,wid in ipairs(data.hide) do widget.setVisible(wid, not show) end
+    for j,wid in ipairs(data.settingControls) do widget.setVisible(wid, false) end
+
+    if show then
+      for name,image in pairs(data.update) do
+        widget.setImage(name,image)     
+      end
+    end
+  end
+end
+
+function mui.showSettingControls(pkg)
+  if not pkg then
+    -- Opening settings for no package; open main MUI settings.
+  else
+    -- Locate package, and load all relative setting controls.
+    for i,pkg in pairs(mui.loaded) do
+      if pkg.name == mui.active then
+        for j,wid in ipairs(pkg.settingControls) do
+          widget.setVisible(wid, true)
+        end
+        return
+      end
+    end
+  end
+end
+
+function showSettings(widgetName,widgetData)
+  mui.showingSettings = not mui.showingSettings
+
+  if mui.showingSettings then
+    mui.showInterfaceControls("")
+    mui.showSettingControls(mui.active)
+  else
+    mui.showInterfaceControls(mui.active)
+  end
+end
