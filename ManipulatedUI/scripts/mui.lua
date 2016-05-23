@@ -140,7 +140,7 @@ function showInterface(widgetName,widgetData)
   if mui.active ~= '' and _ENV[mui.active] and _ENV[mui.active].uninit then _ENV[mui.active].uninit() end
   
   mui.active = widgetData or ''
-  if mui.active ~= '' and mui.active ~= 'muisettings' then
+  if mui.active ~= '' and mui.active ~= 'settings' then
     for i,data in ipairs(mui.loaded) do
     	 widget.setVisible(data.activator,false)
       if data.name ~= mui.active then
@@ -158,7 +158,7 @@ function showInterface(widgetName,widgetData)
     if type(pkg) == "table" and type(pkg.init) == "function" then
       pkg.init()
     end
-  elseif mui.active == 'muisettings' then
+  elseif mui.active == 'settings' then
   	for i,data in ipairs(mui.loaded) do
     	 widget.setVisible(data.activator,false)
        for i,wid in ipairs(data.show) do widget.setVisible(wid,false) end	
@@ -188,7 +188,7 @@ function showInterface(widgetName,widgetData)
   end
 end
 function showSettings(widgetName,widgetData)
-	showInterface(nil,"muisettings")
+	showInterface(nil, "settings")
 end
 
 
