@@ -13,7 +13,7 @@ mui = { packages = { }, active = '' }
 function init()
 	mui.packages = config.getParameter('packages')
 	mui.defaults = config.getParameter('settings.defaults') 
-  
+  mui.settings = config.getParameter('settings.configuration')
   -- Fix packages by allocating missing properties.
   for i,data in ipairs(mui.packages) do
     if not data.show then data.show = {} end
@@ -111,7 +111,11 @@ function showSettings(widgetName,widgetData)
     mui.showInterfaceControls("")
     mui.showSettingControls(mui.active)
   else
-    mui.showInterfaceControls(mui.active)
+    if mui.isInterfaceOpen() then
+      mui.showInterfaceControls(mui.active)
+    else
+      showInterface()
+    end
   end
 end
 
@@ -257,7 +261,7 @@ function mui.showInterfaceControls(pkg)
     for j,wid in ipairs(data.show) do widget.setVisible(wid, show) end
     for j,wid in ipairs(data.hide) do widget.setVisible(wid, not show) end
     for j,wid in ipairs(data.settingControls) do widget.setVisible(wid, false) end
-
+    for j,wid in ipairs(mui.settings.show) do widget.setVisible(wid, false) end
     if show then
       for name,image in pairs(data.update) do
         widget.setImage(name,image)     
@@ -273,7 +277,9 @@ end
 ]]
 function mui.showSettingControls(pkg)
   if not pkg then
-    -- TODO: Opening settings for no package; open main MUI settings.
+     mui.showActivators(false)
+    for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid, true) end
+    for i,wid in ipairs(mui.settings.hide) do widget.setVisible(wid, false) end
   else
     -- Locate package, and load all relative setting controls.
     for i,pkg in pairs(mui.loaded) do
