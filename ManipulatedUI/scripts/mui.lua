@@ -110,9 +110,20 @@ function showSettings(widgetName,widgetData)
   if mui.showingSettings then
     mui.showInterfaceControls("")
     mui.showSettingControls(mui.active)
+    
+    if mui.active then
+      local pkg = _ENV[mui.active]
+      if pkg and type(pkg.settingsOpened) == "function" then
+        pkg.settingsOpened()
+      end
+    end
   else
     if mui.isInterfaceOpen() then
       mui.showInterfaceControls(mui.active)
+      local pkg = _ENV[mui.active]
+      if pkg and type(pkg.settingsClosed) == "function" then
+        pkg.settingsClosed()
+      end
     else
       showInterface()
     end
@@ -277,7 +288,7 @@ end
 ]]
 function mui.showSettingControls(pkg)
   if not pkg then
-     mui.showActivators(false)
+    mui.showActivators(false)
     for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid, true) end
     for i,wid in ipairs(mui.settings.hide) do widget.setVisible(wid, false) end
   else
