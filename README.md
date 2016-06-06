@@ -25,22 +25,22 @@ This button requires two additional parameters:
 It is recommended to first use and adjust the existing template for package listings. The below sample shows a patch operation that adds a button labelled 'Open Sample Interface' to the main menu of MUI.
 ```javascript
 {
-"op" : "add",
-"path" : "/gui/btnMUISample",
-"value" : {
-		"type" : "button",
-		"base" : "/resources/UIActivator.png",
-		"hover" : "/resources/UIActivator.png?brightness=60",
-		"caption" : "Open Sample\n Interface",
-		"fontSize" : 7,
-		"wrapWidth" : 80,
-		"hAnchor" : "mid",
-		"pressedOffset" : [0, -1],
-		"position" : [102, 103],
-
-		"data" : "muiSample",
-		"callback" : "showInterface"
-	} 
+  "op" : "add",
+  "path" : "/gui/btnMUISample",
+  "value" : {
+    "type" : "button",
+    "base" : "/resources/UIActivator.png",
+    "hover" : "/resources/UIActivator.png?brightness=60",
+    "caption" : "Open Sample\n Interface",
+    "fontSize" : 7,
+    "wrapWidth" : 80,
+    "hAnchor" : "mid",
+    "pressedOffset" : [0, -1],
+    "position" : [102, 103],
+    
+    "data" : "muiSample",
+    "callback" : "showInterface"
+  }
 }
 ```
 
@@ -49,7 +49,7 @@ Nothing special here. Simply add your own GUI elements to the config (`"/gui/<el
 
 * If your GUI widgets do not show up, they might be hidden behind other widgets. Adjust the `zlevel` parameter accordingly.
 * It's highly recommended to add a prefix to each of your controls, to prevent duplicate names. This is especially important to prevent issues when users install multiple MUI-compatible interface mods.
-* The position `[1, 22]` aligns elements with the bottom left corner of the inner (gray) body. This inner body is `335x197` in size. Although you can position elements outside of it, this can have some negative side effects.
+* The position `[1, 22]` aligns elements with the bottom left corner of the inner (gray) body. This inner body is `335x197` in size. Although you can position elements outside of it, it is recommended to place your widgets inside of this area.
 
 An example of a patch operation for an image widget can be viewed below.
 ```javascript
@@ -77,7 +77,8 @@ This data is stored in the package table, which mean you'll need to add a new en
 		"activator" : "btnMUISample", // The button name used to show this interface, see chapter 'Main Menu Listing'.
 		"show" : [ "SampleLblTest","SampleBtnTest","SampleImgTest" ], // An array of widget names to show when this interface is opened. These widgets will automatically be hidden when the interface is closed.
 		"hide" : [], // An array of widet names to hide when this interface is opened. These widgets will automatically be shown when the interface is closed.
-		"update" : {}, // Object with keys representing widget names of images and values representing the new image to apply when this interface is opened. This can, for example, be used to change the MUI background body ('bgb').
+		"update" : { "bgb" : "/interface/scripted/mmupgrade/body.png" }, // Object with keys representing widget names of images and values representing the new image to apply when this interface is opened. This can, for example, be used to change the MUI background body ('bgb').
+		"settingControls" : [], // An array of widget names to show when the settings menu is opened while this interface is open. This will hide the interface widgets as defined in 'show', until the settings menu is closed again.
 		"name" : "muiSample", // The name of of the script's table, which should also match the 'data' parameter on the main menu listing button (see chapter Main Menu Listing).
 		"script" : "/scripts/muiSample.lua" // Script loaded when this interface is opened. It should contain a table <name>, optionally containing the functions <name>.init(), <name>.update(dt) and <name>.uninit().
 	}
@@ -99,6 +100,7 @@ When set up properly, MUI will take care of showing and hiding elements when sel
 ### Script
 The script, as defined in the package configuration, will be loaded on initialization. It is expected that this script contains a table using the same name as the data parameter of the main menu button, as well as the package name parameter.
 If the functions `init()`, `update(dt)` and/or `uninit` are defined, they will be called by MUI when opening the interface, while the interface is opened or when closing the interface respectively.
+If the functions `settingsOpened()` and `settingsClosed()` are defined, they will be called by MUI when opening or closing the settings menu. This only applies to the interface that's currently opened.
 Callback functions defined in this script can be used in widgets, as long as they are added to `/scriptWidgetCallbacks`.
 
 You can use the function `mui.back()` to return to the main menu at any time. This will uninitialize your interface.
