@@ -1,5 +1,7 @@
 require "/scripts/util.lua"
 mmupgrade = {}
+mmupgrade.settingsDisabled = true
+
 function mmupgrade.init()
   self.currentUpgrades = {}
   self.upgradeConfig = config.getParameter("upgrades")

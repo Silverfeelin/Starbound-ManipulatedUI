@@ -107,6 +107,8 @@ end
 function showSettings(widgetName,widgetData)
   mui.showingSettings = not mui.showingSettings
 
+  if mui.active and _ENV[mui.active] and _ENV[mui.active].settingsDisabled == true then return end
+  
   if mui.showingSettings then
     mui.showInterfaceControls("")
     mui.showSettingControls(mui.active)
