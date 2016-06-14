@@ -3,7 +3,7 @@
 
 ## Adding Interfaces
 
-### Load order 
+### Load order
 Any MUI interface mod requires the Manipulated UI mod to be loaded first. This requires an addition to your modinfo file:
 
 ```javascript
@@ -37,7 +37,7 @@ It is recommended to first use and adjust the existing template for package list
     "hAnchor" : "mid",
     "pressedOffset" : [0, -1],
     "position" : [102, 103],
-    
+
     "data" : "muiSample",
     "callback" : "showInterface"
   }
@@ -78,6 +78,7 @@ This data is stored in the package table, which mean you'll need to add a new en
 		"show" : [ "SampleLblTest","SampleBtnTest","SampleImgTest" ], // An array of widget names to show when this interface is opened. These widgets will automatically be hidden when the interface is closed.
 		"hide" : [], // An array of widet names to hide when this interface is opened. These widgets will automatically be shown when the interface is closed.
 		"update" : { "bgb" : "/interface/scripted/mmupgrade/body.png" }, // Object with keys representing widget names of images and values representing the new image to apply when this interface is opened. This can, for example, be used to change the MUI background body ('bgb').
+    "settingsEnabled": true, // Value indicating whether to enable (true) or disable (false) the settings menu for this interface, accessed by pressing the cog while the interface is open.
 		"settingControls" : [], // An array of widget names to show when the settings menu is opened while this interface is open. This will hide the interface widgets as defined in 'show', until the settings menu is closed again.
 		"name" : "muiSample", // The name of of the script's table, which should also match the 'data' parameter on the main menu listing button (see chapter Main Menu Listing).
 		"script" : "/scripts/muiSample.lua" // Script loaded when this interface is opened. It should contain a table <name>, optionally containing the functions <name>.init(), <name>.update(dt) and <name>.uninit().

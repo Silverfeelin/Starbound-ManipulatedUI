@@ -65,8 +65,9 @@
 			"show" : [ "SampleLblTest","SampleBtnTest","SampleImgTest" ],
 			"hide" : [],
 			"update" : {},
+      "settingsEnabled": true,
 			"name" : "muiSample",
-			"script" : "/scripts/muiSample.lua" //script should be formatted as <name>.init() and <name>.update(dt)
+			"script" : "/scripts/muiSample.lua"
 		
 		}
   },

@@ -30,6 +30,7 @@ function init()
 	for i,data in ipairs(mui.loaded) do
 		widget.setPosition(data.activator,grid[i])
 		if data.script then require(data.script) end
+    if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
 	end
 
   showInterface()
@@ -107,7 +108,7 @@ end
 function showSettings(widgetName,widgetData)
   mui.showingSettings = not mui.showingSettings
 
-  if mui.active and _ENV[mui.active] and _ENV[mui.active].settingsDisabled == true then return end
+  if mui.active and _ENV[mui.active] and _ENV[mui.active].settingsEnabled ~= true then return end
   
   if mui.showingSettings then
     mui.showInterfaceControls("")
