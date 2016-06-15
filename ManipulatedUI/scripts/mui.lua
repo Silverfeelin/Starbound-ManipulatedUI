@@ -12,7 +12,7 @@ mui = { packages = { }, active = '' }
 ]]
 function init()
 	mui.packages = config.getParameter('packages')
-	mui.defaults = config.getParameter('settings.defaults') 
+	mui.defaults = config.getParameter('settings.defaults')
   mui.settings = config.getParameter('settings.configuration')
   -- Fix packages by allocating missing properties.
   for i,data in ipairs(mui.packages) do
@@ -71,7 +71,7 @@ end
 function showInterface(widgetName,widgetData)
   -- Uninitialize previous package.
   mui.uninitInterface()
-  
+
   mui.active = widgetData
 
   -- Show or hide activator (main menu) widgets.
@@ -90,11 +90,11 @@ function showInterface(widgetName,widgetData)
     mui.setTitle("Manipulated UI", "Manipulates more than the matter manipulator.")
     mui.setIcon("/interface/manipulatorupgradeicon.png")
 
-    for wid,image in pairs(mui.defaults) do 
+    for wid,image in pairs(mui.defaults) do
       widget.setVisible(wid,true)
-      widget.setImage(wid,image) 
+      widget.setImage(wid,image)
     end
-    
+
     for i,data in ipairs(mui.loaded) do widget.setVisible(data.activator,true) end
   end
 end
@@ -109,11 +109,11 @@ function showSettings(widgetName,widgetData)
   mui.showingSettings = not mui.showingSettings
 
   if mui.active and _ENV[mui.active] and _ENV[mui.active].settingsEnabled ~= true then return end
-  
+
   if mui.showingSettings then
     mui.showInterfaceControls("")
     mui.showSettingControls(mui.active)
-    
+
     if mui.active then
       local pkg = _ENV[mui.active]
       if pkg and type(pkg.settingsOpened) == "function" then
@@ -278,7 +278,7 @@ function mui.showInterfaceControls(pkg)
     for j,wid in ipairs(mui.settings.show) do widget.setVisible(wid, false) end
     if show then
       for name,image in pairs(data.update) do
-        widget.setImage(name,image)     
+        widget.setImage(name,image)
       end
     end
   end
@@ -291,9 +291,11 @@ end
 ]]
 function mui.showSettingControls(pkg)
   if not pkg then
+		--[[ Currently disabled: main menu settings.
     mui.showActivators(false)
     for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid, true) end
     for i,wid in ipairs(mui.settings.hide) do widget.setVisible(wid, false) end
+		]]
   else
     -- Locate package, and load all relative setting controls.
     for i,pkg in pairs(mui.loaded) do
