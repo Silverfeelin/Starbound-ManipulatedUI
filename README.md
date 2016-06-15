@@ -1,8 +1,10 @@
 # Manipulated UI (MUI)
-Manipulated UI is a mod that allows compatible mods to be shown and used in the Matter Manipulator Upgrade window. The mod is not meant to be used on it's own, as it will offer no content in-game unless interface mods are installed that utilized Manipulated UI.
+Manipulated UI is a mod that allows compatible mods to be shown and used in the Matter Manipulator Upgrade window. The mod is not meant to be used on it's own, as it will offer no content in-game unless interface mods are installed that utilize Manipulated UI.
 
 
 ## Table of Contents
+- [Download](#download)
+- [Redistributing](#redistributing)
 - [Adding Interfaces](#adding-interfaces)
  - [Load order](#load-order)
  - [Configuration patch](#configuration-patch)
@@ -12,6 +14,13 @@ Manipulated UI is a mod that allows compatible mods to be shown and used in the 
  - [Widget callbacks](#widget-callbacks)
  - [Script](#script)
  - [Additional script functions](#additional-script-functions)
+
+## Download
+The latest version of the mod can be found on the [release](https://github.com/Silverfeelin/Starbound-ManipulatedUI/releases) page.
+
+## Redistributing
+As this mod should be a dependency of your interface mod, it may be a tad tedious to redirect users to this Git.  
+Instead, you're free to include the `.modpak` releases of this mod in your own. No attribution mandatory, but appreciated none the less.
 
 ## Adding Interfaces
 
