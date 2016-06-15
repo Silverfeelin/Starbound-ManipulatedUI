@@ -1,4 +1,17 @@
 # Manipulated UI (MUI)
+Manipulated UI is a mod that allows compatible mods to be shown and used in the Matter Manipulator Upgrade window. The mod is not meant to be used on it's own, as it will offer no content in-game unless interface mods are installed that utilized Manipulated UI.
+
+
+## Table of Contents
+- [Adding Interfaces](#adding-interfaces)
+ - [Load order](#load-order)
+ - [Configuration patch](#configuration-patch)
+ - [Main menu listing](#main-menu-listing)
+ - [Interface widgets](#interface-widgets)
+ - [Package configuration](#package-configuration)
+ - [Widget callbacks](#widget-callbacks)
+ - [Script](#script)
+ - [Additional script functions](#additional-script-functions)
 
 ## Adding Interfaces
 
@@ -15,7 +28,7 @@ Any MUI interface mod requires the Manipulated UI mod to be loaded first. This r
 The `mmupgradegui.config`, located in `/interface/scripted/mmupgrade/`, contains both gui data and package data used to define and identify your interface's configuration.
 To add your own interface, you must patch this file by creating a new file in your mod: `/interface/scripted/mmupgrade/mmupgradegui.config.patch`. It is recommended to take a look at [Kawa's Starbound JSON Lab](http://helmet.kafuka.org/sbmods/json/) if you're unfamiliar with the JSON patch format.
 
-#### Main Menu Listing
+#### Main menu listing
 For your interface to be activatable through the MUI main menu, you need to add your own button. The position of this button will be ignored, as packages are automatically aligned depending on the amount of installed packages.
 This button requires two additional parameters:
 * "data" : "tableName" // The name of your script's Lua table. This should match the `name` parameter in your package configuration. This value is used to identify which interface should be loaded when this button is pressed.
@@ -43,7 +56,7 @@ It is recommended to first use and adjust the existing template for package list
 }
 ```
 
-#### Interface GUI widgets
+#### Interface widgets
 Nothing special here. Simply add your own GUI elements to the config (`"/gui/<elementName>"`). Every control should either be hidden by default (`"visible" : false`) or added to the package configuration described further down below.
 
 * If your GUI widgets do not show up, they might be hidden behind other widgets. Adjust the `zlevel` parameter accordingly.
@@ -103,4 +116,10 @@ If the functions `init()`, `update(dt)` and/or `uninit` are defined, they will b
 If the functions `settingsOpened()` and `settingsClosed()` are defined, they will be called by MUI when opening or closing the settings menu. This only applies to the interface that's currently opened.
 Callback functions defined in this script can be used in widgets, as long as they are added to `/scriptWidgetCallbacks`.
 
-You can use the function `mui.back()` to return to the main menu at any time. This will uninitialize your interface.
+#### Additional script functions
+* `mui.back()`  
+Returns the user to the main menu. This will uninitialize your interface.
+* `mui.setTitle(title, subtitle)`  
+Sets the title and subtitle of the window. This will revert when closing your interface.
+* `mui.setIcon(path)`  
+Sets the top left icon of the window. The icon used should be 24x24 pixels. This will revert when closing your interface. 
