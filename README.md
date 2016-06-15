@@ -1,5 +1,4 @@
 # Manipulated UI (MUI)
- By Silverfeelin and Magicks
 
 ## Adding Interfaces
 
