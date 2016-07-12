@@ -1,0 +1,12 @@
+{
+  "name" : "Manipulated UI",
+  "friendlyName" : "Manipulated UI",
+  "priority" : 0,
+  "version" : "1.0",
+  "author" : "Silverfeelin & Magicks",
+  "description" : "Allows other mods to add their own interfaces to the Matter Manipulator Upgrade Panel.
+
+For usage instructions, see: ^#61b3de;https://github.com/Silverfeelin/Starbound-ManipulatedUI^reset;",
+  "requires" : [],
+  "includes" : []
+}

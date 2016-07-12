@@ -1,0 +1,15 @@
+{
+  "name" : "MUISample",
+  "friendlyName" : "Manipulated UI - Sample",
+  "priority" : 0,
+  "version" : "1.0",
+  "author" : "Silverfeelin & Magicks",
+  "description" : "Sample interface for ^orange;Manipulated UI^reset;. Primarily used to confirm the mod is working properly.
+
+Requires: ^orange;Manipulated UI^reset;
+^#61b3de;https://github.com/Silverfeelin/Starbound-ManipulatedUI/releases^reset;",
+  "requires" : [
+    "Manipulated UI"
+  ],
+  "includes" : []
+}
