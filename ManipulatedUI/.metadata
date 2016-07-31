@@ -1,7 +1,7 @@
 {
   "name" : "Manipulated UI",
   "friendlyName" : "Manipulated UI",
-  "priority" : 0,
+  "priority" : -1,
   "version" : "1.0",
   "author" : "Silverfeelin & Magicks",
   "link" : "https://github.com/Silverfeelin/Starbound-ManipulatedUI",
