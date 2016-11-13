@@ -1,5 +1,6 @@
 require'/scripts/vec2.lua'
 require'/scripts/util.lua'
+require'/scripts/JSON.lua'
 mui = { packages = { }, active = '' }
 
 --[[                            ]]--
@@ -14,6 +15,8 @@ function init()
 	mui.packages = config.getParameter('packages')
 	mui.defaults = config.getParameter('settings.defaults')
   mui.settings = config.getParameter('settings.configuration')
+  mui.maxPerPage = config.getParameter('settings.maxPerPage')
+  mui.showingSettings = false
   -- Fix packages by allocating missing properties.
   for i,data in ipairs(mui.packages) do
     if not data.show then data.show = {} end
@@ -21,12 +24,15 @@ function init()
     if not data.update then data.update = {} end
     if not data.settingControls then data.settingControls = {} end
   end
+  --This will sort packages by priority.
+  table.sort(mui.packages,function(i,j) return(i.priority or 8) < (i.priority or 8) end)
+  --Adds packages to partitions.
+  mui.page = 1
+  mui.maxPages = math.ceil(#mui.packages/mui.maxPerPage)
+  mui.pages = mui:getPages(mui.maxPerPage)
+	mui.loaded = mui.pages[mui.page]
 
-  mui.showingSettings = false
-
-	mui.loaded = mui.allocate(mui.packages)
-
-	local grid = mui.getGridOffsets(#mui.packages,12)
+	local grid = mui.getGridOffsets(#mui.loaded,12)
 	for i,data in ipairs(mui.loaded) do
 		widget.setPosition(data.activator,grid[i])
 		if data.script then require(data.script) end
@@ -77,7 +83,7 @@ function showInterface(widgetName,widgetData)
   -- Show or hide activator (main menu) widgets.
   local show = mui.isInterfaceOpen()
 
-  mui.showActivators(not show)
+  mui.showMainMenuWidgets(not show)
   mui.showInterfaceControls(mui.active)
 
   if show then
@@ -132,6 +138,29 @@ function showSettings(widgetName,widgetData)
     end
   end
 end
+--[[
+  Button callback function to cycle through pages,
+  will ensure that the new loaded packages are initialized.
+  @param [widgetName] - Widget name passed by the callback. Not used.
+  @param [widgetData] - {inc = int} widgetData.inc is the page shift amount, it should be 1 or -1.
+
+]]
+
+function shiftPage(widgetName,widgetData)
+  if not mui.isInterfaceOpen() then
+    mui.showMainMenuWidgets(false)
+    mui.page = util.wrap(mui.page+widgetData.inc,1,#mui.pages)
+    mui.loaded = mui.pages[mui.page]
+
+    local grid = mui.getGridOffsets(#mui.loaded,12)
+  	for i,data in ipairs(mui.loaded) do
+  		widget.setPosition(data.activator,grid[i])
+  		if data.script then require(data.script) end
+      if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
+  	end
+    showInterface()
+  end
+end
 
 --[[         ]]--
 --[[ MUI API ]]--
@@ -173,36 +202,6 @@ function mui.getGridOffsets(n, padding)
     return grid
   end
 end
-
---[[
-  Allocates/decides which packages to load. Packages with the value mustLoad are considered first.
-  The ones loaded can be selected from the settings menu later.
-  @param packageList - List of packages, in the same format as fetched from the config.
-]]
-function mui.allocate(packageList)
-  packageList = copy(packageList)
-
-  list = {}
-  if #packageList <= 10 then return packageList end
-  for i,data in ipairs(packageList) do
-      if data.mustLoad and #list < 10 then
-        table.insert(list,data)
-        list[i].loaded = true
-      end
-  end
-  packageList = util.filter(packageList, function(a) if contains(list,a) then return false end return true end )
-  if #list < 10 then
-    for i,data in ipairs(packageList) do
-      if #list < 10 then
-        data.loaded = true
-
-        table.insert(list,data)
-      end
-    end
-  end
-  return list
-end
-
 
 --[[
   Hides the opened interface (if any), and shows the MUI main menu.
@@ -256,10 +255,25 @@ end
   Shows or hide activator widgets (main menu interface buttons), depending on the given value.
   @param bool - Value indicating whether to show (true) or hide (false) the activator (main menu) widgets.
 ]]
-function mui.showActivators(bool)
+function mui.showMainMenuWidgets(bool)
+  local unloaded = copy(mui.pages)
+  unloaded[mui.page] = nil
   for i,data in ipairs(mui.loaded) do
      widget.setVisible(data.activator, bool)
   end
+  util.each(unloaded,function(k,v)
+    for i,data in ipairs(v) do
+       widget.setVisible(data.activator, false)
+    end
+  end)
+  if #mui.pages > 1 then
+    widget.setVisible('btnPageFwd',bool)
+    widget.setVisible('btnPageBack',bool)
+  else
+    widget.setVisible('btnPageFwd',false)
+    widget.setVisible('btnPageBack',false)
+  end
+
 end
 
 --[[
@@ -269,7 +283,7 @@ end
   @param pkg - Name of the package to show.
 ]]
 function mui.showInterfaceControls(pkg)
-  for i,data in ipairs(mui.loaded) do
+  for i,data in ipairs(mui.packages) do
     local show = data.name == pkg
 
     for j,wid in ipairs(data.show) do widget.setVisible(wid, show) end
@@ -292,7 +306,7 @@ end
 function mui.showSettingControls(pkg)
   if not pkg then
 		--[[ Currently disabled: main menu settings.
-    mui.showActivators(false)
+    mui.showMainMenuWidgets(false)
     for i,wid in ipairs(mui.settings.show) do widget.setVisible(wid, true) end
     for i,wid in ipairs(mui.settings.hide) do widget.setVisible(wid, false) end
 		]]
@@ -307,4 +321,19 @@ function mui.showSettingControls(pkg)
       end
     end
   end
+end
+
+--[[
+  Allocates packages to partitions of size n.
+  @param n - Number of packages per page.
+]]
+function mui:getPages(n)
+  local new = {}
+  for i=1,self.maxPages do
+    new[i] = {}
+    for j = n*i - (n-1), n*i do
+      new[i][j~=n and j % n or j==n and n] = self.packages[j]
+    end
+  end
+  return new
 end
