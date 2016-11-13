@@ -142,14 +142,15 @@ end
   Button callback function to cycle through pages,
   will ensure that the new loaded packages are initialized.
   @param [widgetName] - Widget name passed by the callback. Not used.
-  @param [widgetData] - {inc = int} widgetData.inc is the page shift amount, it should be 1 or -1.
+  @param [widgetData] - is the page shift amount, it should be 1 or -1.
 
 ]]
 
 function shiftPage(widgetName,widgetData)
+  widgetData = widgetData and 1 or -1
   if not mui.isInterfaceOpen() then
     mui.showMainMenuWidgets(false)
-    mui.page = util.wrap(mui.page+widgetData.inc,1,#mui.pages)
+    mui.page = util.wrap(mui.page+widgetData,1,#mui.pages)
     mui.loaded = mui.pages[mui.page]
 
     local grid = mui.getGridOffsets(#mui.loaded,12)
