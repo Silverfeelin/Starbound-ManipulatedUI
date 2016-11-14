@@ -147,7 +147,9 @@ end
 ]]
 
 function shiftPage(widgetName,widgetData)
-  widgetData = widgetData and 1 or -1
+  widgetData = type(widgetData) == "number" and widgetData or 0
+  if widgetData == 0 then return end
+
   if not mui.isInterfaceOpen() then
     mui.showMainMenuWidgets(false)
     mui.page = util.wrap(mui.page+widgetData,1,#mui.pages)
