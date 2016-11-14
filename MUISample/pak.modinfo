@@ -1,7 +1,0 @@
-{
-  "name" : "MUISample",
-  "path" : ".",
-  "requires" : [
-    "Manipulated UI"
-  ]
-}
