@@ -22,10 +22,12 @@ function init()
     if not data.show then data.show = {} end
     if not data.hide then data.hide = {} end
     if not data.update then data.update = {} end
+    if not data.priority then data.priority = 0 end
     if not data.settingControls then data.settingControls = {} end
   end
-  --This will sort packages by priority.
-  table.sort(mui.packages,function(i,j) return(i.priority or 8) < (i.priority or 8) end)
+
+  mui.sortPackages(mui.packages)
+  
   --Adds packages to partitions.
   mui.page = 1
   mui.maxPages = math.ceil(#mui.packages/mui.maxPerPage)
@@ -334,9 +336,26 @@ function mui:getPages(n)
   local new = {}
   for i=1,self.maxPages do
     new[i] = {}
-    for j = n*i - (n-1), n*i do
-      new[i][j~=n and j % n or j==n and n] = self.packages[j]
+    for j = 1,n do
+      local pkgIndex = (i-1)*n + j
+      new[i][j] = self.packages[pkgIndex]
     end
   end
   return new
+end
+
+--[[
+  Sorts the given collection of packages. The given table is directly altered.
+  Sorts by priority (lowest number first). Values with the same priority are sorted by name.
+  @param pkgs - Array of MUI packages
+  @return - Sorted collection. Return value can be ignored, as the source collection is sorted.
+  @see mui.packages
+]]
+function mui.sortPackages(pkgs)
+  table.sort(mui.packages, function(i,j)
+    if i.priority ~= j.priority then
+      return i.priority < j.priority
+    end
+    return i.name:lower() < j.name:lower()
+  end)
 end
