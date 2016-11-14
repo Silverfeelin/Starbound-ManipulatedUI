@@ -1,6 +1,6 @@
 require'/scripts/vec2.lua'
 require'/scripts/util.lua'
-require'/scripts/JSON.lua'
+
 mui = { packages = { }, active = '' }
 
 --[[                            ]]--
