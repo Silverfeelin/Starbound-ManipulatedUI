@@ -132,3 +132,6 @@ Returns the user to the main menu. This will uninitialize your interface.
 Sets the title and subtitle of the window. This will revert when closing your interface.
 * `mui.setIcon(path)`  
 Sets the top left icon of the window. The icon used should be 24x24 pixels. This will revert when closing your interface. 
+* `mui.playerId()`
+Gets the player's entity id; pane.sourceEntity() is broken for this UI location.
+
