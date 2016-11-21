@@ -27,7 +27,7 @@ function init()
   end
 
   mui.sortPackages(mui.packages)
-  
+
   --Adds packages to partitions.
   mui.page = 1
   mui.maxPages = math.ceil(#mui.packages/mui.maxPerPage)
@@ -358,4 +358,18 @@ function mui.sortPackages(pkgs)
     end
     return i.name:lower() < j.name:lower()
   end)
+end
+
+--[[
+  Gets the player's entity id; pane.sourceEntity() is broken.
+  Returns the non-unique entity id for the player.
+]]
+
+function mui.playerId()
+	local uid =  player.ownShipWorldId():match":(.+)"
+	local pos =  world.findUniqueEntity(uid):result()
+  if pos then
+	  local id = world.entityQuery(pos,3,{order = "nearest",includedTypes = {"player"}})[1]
+	  return id
+  end
 end
