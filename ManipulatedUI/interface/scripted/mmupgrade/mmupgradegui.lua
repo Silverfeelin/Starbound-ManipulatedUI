@@ -1,6 +1,8 @@
 require "/scripts/util.lua"
 mmupgrade = {}
 
+local initialized = false
+
 function mmupgrade.init()
   self.currentUpgrades = {}
   self.upgradeConfig = config.getParameter("upgrades")
@@ -14,6 +16,8 @@ function mmupgrade.init()
 
   self.highlightPulseTimer = 0
 
+  initialized = true
+  
   updateGui()
 end
 
@@ -29,6 +33,10 @@ function mmupgrade.update(dt)
     local highlightDirectives = string.format("?multiply=FFFFFF%2x", math.floor((math.cos(self.highlightPulseTimer * 8) * 0.5 + 0.5) * 255))
     widget.setImage("imgHighlight", self.highlightImage .. highlightDirectives)
   end
+end
+
+function mmupgrade.uninit()
+  initialized = false
 end
 
 function selectUpgrade(widgetName, widgetData)
@@ -72,6 +80,7 @@ function performUpgrade(widgetName, widgetData)
 end
 
 function updateGui()
+  if not initialized then return end
   updateCurrentUpgrades()
 
   for k, v in pairs(self.upgradeConfig) do
