@@ -97,6 +97,9 @@ function showInterface(widgetName,widgetData)
     -- Restore main menu / defaults
     mui.setTitle("Manipulated UI", "Manipulates more than the matter manipulator.")
     mui.setIcon("/interface/manipulatorupgradeicon.png")
+    widget.setVisible("btnSettings", true)
+    widget.setVisible("btnBack", true)
+    widget.setVisible("close", true)
 
     for wid,image in pairs(mui.defaults) do
       widget.setVisible(wid,true)
