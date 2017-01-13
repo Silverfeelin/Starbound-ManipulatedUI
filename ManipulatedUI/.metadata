@@ -2,7 +2,7 @@
   "name" : "Manipulated UI",
   "friendlyName" : "Manipulated UI",
   "priority" : -1,
-  "version" : "1.1.0",
+  "version" : "1.2.0",
   "author" : "Silverfeelin & Magicks",
   "description" : "Allows other mods to add their own interfaces to the Matter Manipulator Upgrade Panel.
 
