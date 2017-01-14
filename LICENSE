@@ -9,7 +9,6 @@ copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
 The files listed below are property of Chucklefish LTD. or adapted versions thereof. We do not claim ownership of any of these files and they do not fall under this specific license.
-- /ManipulatedUI/interface/scripted/mmupgrade/mmupgradegui.lua
 - /ManipulatedUI/interface/scripted/mmupgrade/mmupgradegui.config
 - /ManipulatedUI/resources/UIActivator.png
 
