@@ -35,11 +35,7 @@ function init()
 	mui.loaded = mui.pages[mui.page]
 
 	local grid = mui.getGridOffsets(#mui.loaded,12)
-	for i,data in ipairs(mui.loaded) do
-		widget.setPosition(data.activator,grid[i])
-		if data.script then require(data.script) end
-    if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
-	end
+	mui.initializePackages(mui.loaded,grid)
 
   showInterface()
 end
@@ -161,11 +157,7 @@ function shiftPage(widgetName,widgetData)
     mui.loaded = mui.pages[mui.page]
 
     local grid = mui.getGridOffsets(#mui.loaded,12)
-  	for i,data in ipairs(mui.loaded) do
-  		widget.setPosition(data.activator,grid[i])
-  		if data.script then require(data.script) end
-      if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
-  	end
+  	mui.initializePackages(mui.loaded,grid)
     showInterface()
   end
 end
@@ -181,6 +173,10 @@ end
   @param padding - Amount of vertical space surrounding each activator. This means
   the distance of two activators will be padding * 2.
 ]]
+mui.init = init
+mui.update = update
+mui.uninit = uninit
+
 function mui.getGridOffsets(n, padding)
   local offset = {102,103}
   if n == 1 then
@@ -374,5 +370,33 @@ function mui.playerId()
   if pos then
 	  local id = world.entityQuery(pos,3,{order = "nearest",includedTypes = {"player"}})[1]
 	  return id
+  end
+end
+
+function mui.initializePackages(loaded,grid)
+  for i,data in ipairs(loaded) do
+    widget.setPosition(data.activator,grid[i])
+    if data.script then require(data.script) end
+    -- note any changes to the global engine callbacks, this means packages could be malformed
+    local initChanged,updateChanged,uninitChanged = init ~= mui.init,update ~= mui.update,uninit ~= mui.uninit
+
+    if _ENV[data.name] == nil or type(_ENV[data.name]) ~= 'table' then --If there's no package lib/object make one.
+      _ENV[data.name] = {}
+      _ENV[data.name].init = initChanged and init or nil
+      _ENV[data.name].update = updateChanged and update or nil
+      _ENV[data.name].uninit = uninitChanged and uninit or nil
+      if data.name ~= 'mmupgrade' then
+        sb.logWarn('Manipulated UI: Package `%s` is malformed; there may be a mod conflict.',data.name)
+      end
+    elseif not _ENV[data.name].init or not _ENV[data.name].update or not _ENV[data.name].uninit then -- Catches partial tables which may have half implemented package libs/objects
+      if not _ENV[data.name].init and initChanged then _ENV[data.name].init = init end
+      if not _ENV[data.name].update and updateChanged then _ENV[data.name].update = update end
+      if not _ENV[data.name].uninit and uninitChanged then _ENV[data.name].uninit = uninit end
+    end
+    --reset global functions to prevent the interface crashing on the next execution of said globals.
+    init = mui.init
+    update = mui.update
+    uninit = mui.uninit
+    if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
   end
 end
