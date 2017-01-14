@@ -167,16 +167,19 @@ end
 --[[         ]]--
 
 --[[
+  Engine callback constants, prevents bad packages from overwriting them.
+]]
+mui.init = init
+mui.update = update
+mui.uninit = uninit
+
+--[[
   For n amount of packages, calculate the position needed to place activators at.
   This assumes the default activator dimensions are used (130x36).
   @param n - Amount of packages. Should not exceed 10.
   @param padding - Amount of vertical space surrounding each activator. This means
   the distance of two activators will be padding * 2.
 ]]
-mui.init = init
-mui.update = update
-mui.uninit = uninit
-
 function mui.getGridOffsets(n, padding)
   local offset = {102,103}
   if n == 1 then
