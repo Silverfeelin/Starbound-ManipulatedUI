@@ -1,0 +1,15 @@
+{
+  "name" : "MUI-Debug",
+  "friendlyName" : "Manipulated UI - Debug",
+  "priority" : 0,
+  "version" : "1.0",
+  "author" : "Silverfeelin & Magicks",
+  "description" : "Enables debug mode for Mui.
+
+Requires: ^orange;Manipulated UI^reset;
+^#61b3de;https://github.com/Silverfeelin/Starbound-ManipulatedUI/releases^reset;",
+  "requires" : [
+    "Manipulated UI"
+  ],
+  "includes" : []
+}
