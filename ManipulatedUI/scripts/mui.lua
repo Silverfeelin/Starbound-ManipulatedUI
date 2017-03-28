@@ -1,7 +1,37 @@
 require'/scripts/vec2.lua'
 require'/scripts/util.lua'
+require'/scripts/set.lua'
+local insert,concat,remove,pack,unpack = table.insert,table.concat,table.remove,table.pack,table.unpack
+mui = { packages = { }, active = '', warns = { }, callbacks = set.new{'update','init','uninit'}, logs = {} }
 
-mui = { packages = { }, active = '' }
+--[[
+  _ENV control:
+    This keeps the namespace nice and tidy, you can't add callbacks that are already defined.
+    Anything packages add is stored in their table, _ENV has virtual keys from mui and the active package.
+    This makes all functions or objects defined in package scripts private but also allows the packages to continue as normal.
+    Starbound respects metamethods for the game callbacks so widget callbacks and init update uninit etc are always available.
+]]
+local _ignore;
+setmetatable(_ENV,{
+  __newindex = function(t,k,v) --catch new values being created
+    if mui.callbacks[k] and not _ignore then
+      mui.log('debugwarn','Error callback %s already exists in the MUI environment.',k)
+    else
+      rawset(t,k,v)
+    end
+  end,
+  __index = function(t,k)
+    if not _ignore then
+      local pkg;
+      if mui.active ~='' then
+         pkg = rawget(t,mui.active)
+      end
+      return mui[k] or (pkg and pkg[k])
+    end
+  end
+})
+
+
 
 --[[                            ]]--
 --[[ Starbound Engine Callbacks ]]--
@@ -11,12 +41,14 @@ mui = { packages = { }, active = '' }
  	Initialize function, called by the game's engine when MUI is opened (after this script is loaded).
  	Obtains configuration details and positions main menu package controls.
 ]]
-function init()
+function mui.init()
 	mui.packages = config.getParameter('packages')
 	mui.defaults = config.getParameter('settings.defaults')
   mui.settings = config.getParameter('settings.configuration')
   mui.maxPerPage = config.getParameter('settings.maxPerPage')
+  mui.debug = config.getParameter('settings.debug')
   mui.showingSettings = false
+  mui.flush()
   -- Fix packages by allocating missing properties.
   for i,data in ipairs(mui.packages) do
     if not data.show then data.show = {} end
@@ -35,8 +67,9 @@ function init()
 	mui.loaded = mui.pages[mui.page]
 
 	local grid = mui.getGridOffsets(#mui.loaded,12)
+  mui.log("debuginfo","Calling initializePackages.")
 	mui.initializePackages(mui.loaded,grid)
-
+  mui.log("debuginfo","Finished calling initializePackages.")
   showInterface()
 end
 
@@ -44,7 +77,7 @@ end
  Update function, called by the game's engine every tick while MUI is open.
  Runs the update function of the currently opened interface, if this function exists.
 ]]
-function update(dt)
+function mui.update(dt)
   if mui.active ~= '' then
     local pkg = _ENV[mui.active]
     if type(pkg) == "table" and type(pkg.update) == "function" then pkg.update(dt) end
@@ -55,7 +88,7 @@ end
   Uninitialize function, called by the game's engine when MUI is closed.
   Runs the uninitialize function of the currently opened interface, if this function exists.
 ]]
-function uninit()
+function mui.uninit()
   if mui.active ~= '' then
     local pkg = _ENV[mui.active]
     if type(pkg) == "table" and type(pkg.uninit) == "function" then pkg.uninit() end
@@ -72,7 +105,7 @@ end
   @param [widgetName] - Widget name of the button.
   @param [widgetData] - Widget data, which should be the table name as defined in the package.
 ]]
-function showInterface(widgetName,widgetData)
+function mui.showInterface(widgetName,widgetData)
   -- Uninitialize previous package.
   mui.uninitInterface()
 
@@ -112,7 +145,7 @@ end
   @param [widgetName] - Widget name passed by the callback. Not used.
   @param [widgetData] - Widget data passed by the callback. Not used.
 ]]
-function showSettings(widgetName,widgetData)
+function mui.showSettings(widgetName,widgetData)
   mui.showingSettings = not mui.showingSettings
 
   if mui.active and _ENV[mui.active] and _ENV[mui.active].settingsEnabled ~= true then return end
@@ -147,7 +180,7 @@ end
 
 ]]
 
-function shiftPage(widgetName,widgetData)
+function mui.shiftPage(widgetName,widgetData)
   widgetData = type(widgetData) == "number" and widgetData or 0
   if widgetData == 0 then return end
 
@@ -169,9 +202,6 @@ end
 --[[
   Engine callback constants, prevents bad packages from overwriting them.
 ]]
-mui.init = init
-mui.update = update
-mui.uninit = uninit
 
 --[[
   For n amount of packages, calculate the position needed to place activators at.
@@ -367,39 +397,129 @@ end
   Returns the non-unique entity id for the player.
 ]]
 
+
+
 function mui.playerId()
-	local uid =  player.ownShipWorldId():match":(.+)"
-	local pos =  world.findUniqueEntity(uid):result()
-  if pos then
-	  local id = world.entityQuery(pos,3,{order = "nearest",includedTypes = {"player"}})[1]
-	  return id
+	return player.id()
+end
+
+local function envdif(src,new)
+  local out = {}
+  for k,v in pairs(new) do
+    if not src[k] or mui.callbacks[k] then
+      out[k] = v
+    end
+  end
+  return out
+end
+
+local function copy(t,parent)
+  if type(v) ~= "table" or t == parent then
+    return shallowCopy(t)
+  else
+    local c = {}
+    for k,v in pairs(t) do
+      c[k] = copy(v,t)
+    end
+    setmetatable(c, getmetatable(t))
+    return c
   end
 end
 
 function mui.initializePackages(loaded,grid)
+  _ignore = true
+  mui.log('debuginfo',"In initializePackages")
+  local names = util.map(loaded,function(i) return i.name end)
+  local nameSet = set.new(names)
+  mui.log('debuginfo',"Package loading order: [ %s ]",concat(names,"\n"))
+  local env = copy(_ENV)
   for i,data in ipairs(loaded) do
     widget.setPosition(data.activator,grid[i])
-    if data.script then require(data.script) end
-    -- note any changes to the global engine callbacks, this means packages could be malformed
-    local initChanged,updateChanged,uninitChanged = init ~= mui.init,update ~= mui.update,uninit ~= mui.uninit
+    mui.log('debuginfo',"In %s , loading script.",data.name)
 
-    if _ENV[data.name] == nil or type(_ENV[data.name]) ~= 'table' then --If there's no package lib/object make one.
+    if data.script and type(data.script) == "string" then require(data.script);
+    elseif data.script and type(data.script) == "table" then  for _,modu in ipairs(data.script) do require(modu) end  end
+
+    local diff = envdif(env,_ENV)
+
+    if _ENV[data.name] == nil or type(_ENV[data.name]) ~= 'table' then
       _ENV[data.name] = {}
-      _ENV[data.name].init = initChanged and init or nil
-      _ENV[data.name].update = updateChanged and update or nil
-      _ENV[data.name].uninit = uninitChanged and uninit or nil
       if data.name ~= 'mmupgrade' then
-        sb.logWarn('Manipulated UI: Package `%s` is malformed; there may be a mod conflict.',data.name)
+      mui.log('warn','Package `%s` is malformed; there may be a mod conflict.',data.name)
       end
-    elseif not _ENV[data.name].init or not _ENV[data.name].update or not _ENV[data.name].uninit then -- Catches partial tables which may have half implemented package libs/objects
-      if not _ENV[data.name].init and initChanged then _ENV[data.name].init = init end
-      if not _ENV[data.name].update and updateChanged then _ENV[data.name].update = update end
-      if not _ENV[data.name].uninit and uninitChanged then _ENV[data.name].uninit = uninit end
     end
-    --reset global functions to prevent the interface crashing on the next execution of said globals.
-    init = mui.init
-    update = mui.update
-    uninit = mui.uninit
+
+    for k,v in pairs(diff) do
+      if nameSet[k] then goto continue end
+      mui.log("debuginfo","Package %s, rerouting %s -> %s.%s ",data.name,k,data.name,k)
+      _ENV[data.name][k] =v
+      _ENV[k] = nil
+      ::continue::
+    end
+
+    mui.log("debuginfo","Finished reroutes for %s",data.name)
+
     if _ENV[data.name].settingsEnabled == nil then _ENV[data.name].settingsEnabled = data.settingsEnabled end
+
+    mui.log('debuginfo',"Merging callbacks")
+    mui.callbacks = util.mergeTable(mui.callbacks,set.new(diff))
+
+    mui.log('debuginfo',"Finished for %s",data.name)
+    mui.log()
   end
+  _ignore = false
+  mui.log("debuginfo","Finished loading packages")
+end
+
+function string.starts(str,Start)
+   return str:sub(1,string.len(Start)) ==Start
+end
+
+
+function string.ends(str,End)
+   return str:sub(-string.len(End))==End
+end
+
+function string.suffix (str,pre)
+  return str:starts(pre) and str:sub(#pre+1) or str
+end
+
+function string:count(pattern)
+	local c = 0;
+	for match in self:gmatch(pattern) do
+		c = c +1
+	end
+	return c
+end
+function string:fmtCheck(...)
+  return self:count('%%s') == select('#',...)
+end
+function string:properNoun()
+  return self:gsub("^(.)",string.upper,1)
+end
+
+function mui.log (level,msg,...)
+  local fmt = "Manipulated UI: %s"
+  if not (level and msg and ...) then level = 'debugspacer' end
+  
+  if level:suffix'debug' == 'spacer' then
+    fmt = '------------------------------------------------------------------'
+    msg = fmt
+    level = level:starts"debug" and 'debuginfo' or 'info'
+  end
+  if level:starts"debug" then  if not mui.debug then return  end; level = level:suffix'debug'; fmt = "Manipulated UI (DEBUG): %s";  end
+  if type(msg) == 'string' and msg:fmtCheck(...) and ... then
+    msg = msg:format( unpack( util.map( pack(...), sb.print or tostring ) ) )
+  elseif type(msg) == 'table' then
+    msg = sb.printJson(msg,1)
+  end
+  local logger = sb and (sb["log"..level:properNoun()] or sb.logInfo) or nil
+  if logger then logger(fmt:format(msg));
+  else insert(mui.logs,{level,msg});
+  end
+end
+
+local function flusher(i) mui.log(unpack(i)) end
+function mui.flush()
+  util.map(mui.logs,flusher)
 end
