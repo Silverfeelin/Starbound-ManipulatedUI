@@ -2,7 +2,7 @@ require'/scripts/vec2.lua'
 require'/scripts/util.lua'
 require'/scripts/set.lua'
 local insert,concat,remove,pack,unpack = table.insert,table.concat,table.remove,table.pack,table.unpack
-mui = { packages = { }, active = '', warns = { }, callbacks = set.new{'update','init','uninit'}, logs = {} }
+mui = { packages = { }, active = '', warns = { }, callbacks = { }, logs = {} }
 
 --[[
   _ENV control:
@@ -11,11 +11,12 @@ mui = { packages = { }, active = '', warns = { }, callbacks = set.new{'update','
     This makes all functions or objects defined in package scripts private but also allows the packages to continue as normal.
     Starbound respects metamethods for the game callbacks so widget callbacks and init update uninit etc are always available.
 ]]
+for _,cb in pairs{"update","init","uninit"} do _ENV[cb] = nil end
 local _ignore;
 setmetatable(_ENV,{
   __newindex = function(t,k,v) --catch new values being created
     if mui.callbacks[k] and not _ignore then
-      mui.log('debugwarn','Error callback %s already exists in the MUI environment.',k)
+      mui.log("warn","Tried to add "..k.." to mui namespace.")
     else
       rawset(t,k,v)
     end
@@ -49,6 +50,7 @@ function mui.init()
   mui.debug = config.getParameter('settings.debug')
   mui.showingSettings = false
   mui.flush()
+  local p_seen = {}
   -- Fix packages by allocating missing properties.
   for i,data in ipairs(mui.packages) do
     if not data.show then data.show = {} end
@@ -56,6 +58,18 @@ function mui.init()
     if not data.update then data.update = {} end
     if not data.priority then data.priority = 0 end
     if not data.settingControls then data.settingControls = {} end
+    if not data.name then
+      widget.setVisible("mui_error_pane",true)
+      widget.setVisible("mui_error_text",true)
+      widget.setText("mui_error_text",string.format("Package number %d had no name!\n%s",i,sb.printJson(data,1)))
+      error(string.format("Package number %d had no name!",i),2)
+    end
+    if p_seen[data.name] then
+      local oldname = data.name
+      data.name = oldname .. p_seen[oldname]
+      p_seen[oldname] = p_seen[oldname] + 1
+    end
+    p_seen[data.name] = 1
   end
 
   mui.sortPackages(mui.packages)
@@ -396,13 +410,19 @@ end
   Gets the player's entity id; pane.sourceEntity() is broken.
   Returns the non-unique entity id for the player.
 ]]
-
-
-
 function mui.playerId()
 	return player.id()
 end
+--[[
+  A lot of code for loading in new packages.
+  `mui.callbacks` is a record of what mui looked after loading.
+  `envdif` finds everything added to _ENV.
+  `copy` is used to get a deep copy of the current _ENV (indirect recursion will create overflows, but copy can detect direct recursion)
+  `names` is a mapper which does: package -> pakage name
+  `mui.initializePackages` a function which handles so many edge cases.
 
+]]
+mui.callbacks = set.new(util.keys(mui))
 local function envdif(src,new)
   local out = {}
   for k,v in pairs(new) do
@@ -426,32 +446,33 @@ local function copy(t,parent)
   end
 end
 
+local function names(i) return i.name end
+
 function mui.initializePackages(loaded,grid)
   _ignore = true
   mui.log('debuginfo',"In initializePackages")
-  local names = util.map(loaded,function(i) return i.name end)
+  local names = util.map(loaded,names)
   local nameSet = set.new(names)
-  mui.log('debuginfo',"Package loading order: [ %s ]",concat(names,"\n"))
+  mui.log('debuginfo',"Package loading order: [ %s ]",concat(names," -> "))
   local env = copy(_ENV)
   for i,data in ipairs(loaded) do
     widget.setPosition(data.activator,grid[i])
-    mui.log('debuginfo',"In %s , loading script.",data.name)
+    mui.log('debuginfo','Loading %s\'s scripts : `%s`',data.name,sb.printJson(data.script,1))
 
     if data.script and type(data.script) == "string" then require(data.script);
-    elseif data.script and type(data.script) == "table" then  for _,modu in ipairs(data.script) do require(modu) end  end
+      elseif data.script and type(data.script) == "table" then  for _,modu in ipairs(data.script) do require(modu) end  end
 
     local diff = envdif(env,_ENV)
-
     if _ENV[data.name] == nil or type(_ENV[data.name]) ~= 'table' then
       _ENV[data.name] = {}
       if data.name ~= 'mmupgrade' then
-      mui.log('warn','Package `%s` is malformed; there may be a mod conflict.',data.name)
+      mui.log('warn','Package `%s` is malformed',data.name)
       end
     end
-
+    mui.log("debuginfo","Rerouting package content to table _ENV.%s",data.name)
     for k,v in pairs(diff) do
       if nameSet[k] then goto continue end
-      mui.log("debuginfo","Package %s, rerouting %s -> %s.%s ",data.name,k,data.name,k)
+      mui.log("debuginfo","%s -> %s.%s ",k,data.name,k)
       _ENV[data.name][k] =v
       _ENV[k] = nil
       ::continue::
@@ -467,7 +488,7 @@ function mui.initializePackages(loaded,grid)
     mui.log('debuginfo',"Finished for %s",data.name)
     mui.log()
   end
-  _ignore = false
+  _ignore = nil
   mui.log("debuginfo","Finished loading packages")
 end
 
@@ -500,16 +521,17 @@ end
 
 function mui.log (level,msg,...)
   local fmt = "Manipulated UI: %s"
-  if not (level and msg and ...) then level = 'debugspacer' end
-  
+  if not ( (level and msg) or ...) then level = 'debugspacer' end
   if level:suffix'debug' == 'spacer' then
     fmt = '------------------------------------------------------------------'
     msg = fmt
     level = level:starts"debug" and 'debuginfo' or 'info'
   end
   if level:starts"debug" then  if not mui.debug then return  end; level = level:suffix'debug'; fmt = "Manipulated UI (DEBUG): %s";  end
+
+
   if type(msg) == 'string' and msg:fmtCheck(...) and ... then
-    msg = msg:format( unpack( util.map( pack(...), sb.print or tostring ) ) )
+    msg = msg:format( unpack( util.map( pack(...), sb and sb.print or tostring ) ) )
   elseif type(msg) == 'table' then
     msg = sb.printJson(msg,1)
   end
