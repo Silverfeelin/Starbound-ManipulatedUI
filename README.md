@@ -1,3 +1,6 @@
+## The Manipulated UI was a solution around limited features in Starbound. It has since been replaced with the Quickbar, which utilises newer features Chucklefish provided after Manipulated UI came to be. With the Quickbar taking over, there's no longer any intention to continue working on this mod.
+# https://github.com/Silverfeelin/Starbound-Quickbar-Mini
+
 # Manipulated UI (MUI)
 Manipulated UI is a mod that allows compatible mods to be shown and used in the Matter Manipulator Upgrade window. The mod is not meant to be used on it's own, as it will offer no content in-game unless interface mods are installed that utilize Manipulated UI.
 
